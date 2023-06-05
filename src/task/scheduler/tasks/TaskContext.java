@@ -5,6 +5,11 @@ import java.util.function.Consumer;
 
 public class TaskContext implements Comparable<TaskContext>{
     private final ITask task;
+
+    public TaskState getTaskState() {
+        return taskState;
+    }
+
     private TaskState taskState = TaskState.NOTSTARTED;
     private final int priority;
     private final Thread thread;
