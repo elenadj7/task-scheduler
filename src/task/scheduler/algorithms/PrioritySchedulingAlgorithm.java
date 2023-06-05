@@ -3,6 +3,7 @@ package task.scheduler.algorithms;
 import task.scheduler.tasks.TaskContext;
 
 import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class PrioritySchedulingAlgorithm extends SchedulingAlgorithm{
     private final PriorityQueue<TaskContext> queue = new PriorityQueue<>();
@@ -18,5 +19,9 @@ public class PrioritySchedulingAlgorithm extends SchedulingAlgorithm{
     @Override
     public synchronized int size() {
         return queue.size();
+    }
+    @Override
+    public String toString(){
+        return "PrioritySchedulingAlgorithm";
     }
 }

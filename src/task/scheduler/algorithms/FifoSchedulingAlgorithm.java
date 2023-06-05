@@ -19,4 +19,8 @@ public class FifoSchedulingAlgorithm extends SchedulingAlgorithm{
     public synchronized int size() {
         return queue.size();
     }
+    @Override
+    public String toString(){
+        return "FifoSchedulingAlgorithm";
+    }
 }
