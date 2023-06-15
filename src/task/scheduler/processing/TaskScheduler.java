@@ -22,73 +22,80 @@ public class TaskScheduler {
         this.taskQueue = taskQueue;
     }
 
-    public Task schedule(ITask task, int priority){
+    public Task schedule(ITask task, int priority) {
         return handleSchedule(task, priority);
     }
 
-    public Task schedule(ITask task){
+    public Task schedule(ITask task) {
         return handleSchedule(task, 0);
     }
-    private Task handleSchedule(ITask task, int priority){
+
+    private Task handleSchedule(ITask task, int priority) {
         TaskContext taskContext = new TaskContext(task, this::handleTaskFinished, this::handleTaskPaused, this::handleTaskContinueRequested, priority);
-        synchronized (toLock){
-            if(runningTasks.size() < maxConcurrentTasks){
+        synchronized (toLock) {
+            if (runningTasks.size() < maxConcurrentTasks) {
                 runningTasks.add(taskContext);
                 taskContext.start();
-            }
-            else {
+            } else {
                 taskQueue.add(taskContext);
             }
         }
 
         return new Task(taskContext);
     }
-    private Task handleScheduleWithoutStarting(ITask task, int priority){
+
+    private Task handleScheduleWithoutStarting(ITask task, int priority) {
         TaskContext taskContext = new TaskContext(task, this::handleTaskFinished, this::handleTaskPaused, this::handleTaskContinueRequested, priority);
-        synchronized (toLock){
+        synchronized (toLock) {
             scheduledButNotStartedTasks.addLast(taskContext);
         }
         return new Task(taskContext);
     }
-    public Task scheduleWithoutStarting(ITask task, int priority){
+
+    public Task scheduleWithoutStarting(ITask task, int priority) {
         return handleScheduleWithoutStarting(task, priority);
     }
-    public Task scheduleWithoutStarting(ITask task){
+
+    public Task scheduleWithoutStarting(ITask task) {
         return handleScheduleWithoutStarting(task, 0);
     }
-    public void scheduleTask(ITask task, int priority){
+
+    public TaskContext scheduleTask(ITask task, int priority) {
         Task t = schedule(task, priority);
-        synchronized (toLock){
+        synchronized (toLock) {
             scheduledButNotStartedTasks.remove(t.getTaskContext());
         }
+        return t.getTaskContext();
     }
-    private void handleTaskFinished(TaskContext taskContext){
-        synchronized (toLock){
+
+    private void handleTaskFinished(TaskContext taskContext) {
+        synchronized (toLock) {
             runningTasks.remove(taskContext);
-            if(taskQueue.size() > 0){
+            if (taskQueue.size() > 0) {
                 TaskContext firstTaskContext = taskQueue.remove();
                 runningTasks.add(firstTaskContext);
                 firstTaskContext.start();
             }
         }
     }
-    private void handleTaskPaused(TaskContext taskContext){
-        synchronized (toLock){
+
+    private void handleTaskPaused(TaskContext taskContext) {
+        synchronized (toLock) {
             runningTasks.remove(taskContext);
-            if(taskQueue.size() > 0){
+            if (taskQueue.size() > 0) {
                 TaskContext firstTaskContext = taskQueue.remove();
                 runningTasks.add(firstTaskContext);
                 firstTaskContext.start();
             }
         }
     }
-    private void handleTaskContinueRequested(TaskContext taskContext){
-        synchronized (toLock){
-            if(runningTasks.size() < maxConcurrentTasks){
+
+    private void handleTaskContinueRequested(TaskContext taskContext) {
+        synchronized (toLock) {
+            if (runningTasks.size() < maxConcurrentTasks) {
                 runningTasks.add(taskContext);
                 taskContext.start();
-            }
-            else {
+            } else {
                 taskQueue.add(taskContext);
             }
         }

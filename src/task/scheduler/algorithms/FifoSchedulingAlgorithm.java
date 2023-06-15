@@ -4,12 +4,14 @@ import task.scheduler.tasks.TaskContext;
 
 import java.util.LinkedList;
 
-public class FifoSchedulingAlgorithm extends SchedulingAlgorithm{
+public class FifoSchedulingAlgorithm extends SchedulingAlgorithm {
     private final LinkedList<TaskContext> queue = new LinkedList<>();
+
     @Override
     public synchronized void add(TaskContext taskContext) {
         queue.addLast(taskContext);
     }
+
     @Override
     public synchronized TaskContext remove() {
         return queue.pollFirst();
@@ -19,8 +21,9 @@ public class FifoSchedulingAlgorithm extends SchedulingAlgorithm{
     public synchronized int size() {
         return queue.size();
     }
+
     @Override
-    public String toString(){
+    public String toString() {
         return "FifoSchedulingAlgorithm";
     }
 }

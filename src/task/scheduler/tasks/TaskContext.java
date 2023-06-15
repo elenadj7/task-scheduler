@@ -3,7 +3,7 @@ package task.scheduler.tasks;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
-public class TaskContext implements Comparable<TaskContext>{
+public class TaskContext implements Comparable<TaskContext> {
     private final ITask task;
 
     public TaskState getTaskState() {
@@ -20,7 +20,8 @@ public class TaskContext implements Comparable<TaskContext>{
     private final Semaphore finishedSemaphore = new Semaphore(0);
     private final Semaphore resumeSemaphore = new Semaphore(0);
     private int numberOfWaiters = 0;
-    public TaskContext(ITask task, Consumer<TaskContext> onTaskFinished, Consumer<TaskContext> onTaskPaused, Consumer<TaskContext> onTaskContinueRequested, int priority){
+
+    public TaskContext(ITask task, Consumer<TaskContext> onTaskFinished, Consumer<TaskContext> onTaskPaused, Consumer<TaskContext> onTaskContinueRequested, int priority) {
         this.task = task;
         this.onTaskFinished = onTaskFinished;
         this.onTaskPaused = onTaskPaused;
@@ -34,16 +35,19 @@ public class TaskContext implements Comparable<TaskContext>{
             }
         });
     }
-    public ITask getTask(){
+
+    public ITask getTask() {
         return task;
     }
+
     public int getPriority() {
         return priority;
     }
-    private void finish(){
 
-        synchronized (toLock){
-            switch (taskState){
+    private void finish() {
+
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED -> {
                     throw new IllegalStateException("Task not started");
                 }
@@ -52,7 +56,7 @@ public class TaskContext implements Comparable<TaskContext>{
                 }
                 case RUNNING -> {
                     taskState = TaskState.FINISHED;
-                    if(numberOfWaiters > 0){
+                    if (numberOfWaiters > 0) {
                         finishedSemaphore.release(numberOfWaiters);
                     }
                     onTaskFinished.accept(this);
@@ -66,9 +70,10 @@ public class TaskContext implements Comparable<TaskContext>{
             }
         }
     }
-    public void start(){
-        synchronized (toLock){
-            switch (taskState){
+
+    public void start() {
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED -> {
                     taskState = TaskState.RUNNING;
                     thread.start();
@@ -92,17 +97,18 @@ public class TaskContext implements Comparable<TaskContext>{
             }
         }
     }
+
     public void waitToExecute() throws InterruptedException {
-        synchronized (toLock){
-            switch (taskState){
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED, RUNNINGWITHPAUSEREQUEST -> {
 
                 }
-                case RUNNING -> {
-                    numberOfWaiters++;
-                }
                 case FINISHED -> {
                     return;
+                }
+                case RUNNING -> {
+                    numberOfWaiters++;
                 }
                 default -> {
                     throw new IllegalStateException("Invalid task state");
@@ -112,9 +118,9 @@ public class TaskContext implements Comparable<TaskContext>{
         finishedSemaphore.acquire();
     }
 
-    public void requestPause(){
-        synchronized (toLock){
-            switch (taskState){
+    public void requestPause() {
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED -> {
                     throw new IllegalStateException("Task not started");
                 }
@@ -129,9 +135,9 @@ public class TaskContext implements Comparable<TaskContext>{
         }
     }
 
-    public void requestContinue(){
-        synchronized (toLock){
-            switch (taskState){
+    public void requestContinue() {
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED, FINISHED, RUNNING -> {
 
                 }
@@ -146,10 +152,11 @@ public class TaskContext implements Comparable<TaskContext>{
             }
         }
     }
+
     public void checkForPause() throws InterruptedException {
         boolean shouldPause = false;
-        synchronized (toLock){
-            switch (taskState){
+        synchronized (toLock) {
+            switch (taskState) {
                 case NOTSTARTED, FINISHED -> {
                     throw new IllegalStateException("Invalid task state");
                 }
@@ -164,9 +171,13 @@ public class TaskContext implements Comparable<TaskContext>{
                 default -> throw new IllegalStateException("Invalid task state");
             }
         }
-        if(shouldPause){
+        if (shouldPause) {
             resumeSemaphore.acquire();
         }
+    }
+
+    public void stopThread() {
+        thread.stop();
     }
 
     @Override
