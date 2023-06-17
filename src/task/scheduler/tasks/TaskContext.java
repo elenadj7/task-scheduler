@@ -52,7 +52,7 @@ public class TaskContext implements Comparable<TaskContext> {
                     throw new IllegalStateException("Task not started");
                 }
                 case RUNNINGWITHPAUSEREQUEST -> {
-
+                    taskState = TaskState.FINISHED;
                 }
                 case RUNNING -> {
                     taskState = TaskState.FINISHED;
