@@ -25,11 +25,12 @@ public class Task {
         taskContext = scheduler.scheduleTask(taskContext.getTask(), taskContext.getPriority());
     }
 
+    public void stop() {
+        taskContext.stopThread();
+    }
+
     public TaskContext getTaskContext() {
         return taskContext;
     }
 
-    public void stop() {
-        taskContext.stopThread();
-    }
 }
